@@ -8,4 +8,6 @@
 
 --> TSDF of each image is calculated running tsdf.h, tsdf_kernels.cu, and tsdf.cu.
 
---> RPN.jl includes the model, produces 2000 bounding box for each image, and calculates the accuracy with ground truth values.
+--> RPN.jl includes the model, produces bounding boxes for each image, and calculates the accuracy with ground truth values.
+
+--> NMS (Non-maximum supression) is used for removing the unnecessary boxes
