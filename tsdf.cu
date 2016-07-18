@@ -1,18 +1,14 @@
-
 #include "tsdf.h"
 
-//Global variables
 std::vector<Scene3D*> scenes;
 std::vector<int> box_id;
 int totalObjectCount = 0;
 float scale = 100;
-float context_pad =0;
-std::vector<int> grid_size {6,208,208,100};
-int encode_type =102;
+float context_pad =3;
+std::vector<int> grid_size {3,208,208,100};
+int encode_type =100;
 int totalScenes = 0;
-string file_list = "..//data//RPN_NYU_test.list";
-string data_root =  "..//data//";
-string output_data = "..//data//tsdf_result//";
+string file_list = "boxes_NYU_po_test_nb2000_fb.list";
 
 int main(int argc, char **argv){
 
@@ -36,7 +32,7 @@ int main(int argc, char **argv){
 
 		
 		string s = scene->filename;
-		scene->filename = data_root+scene->filename+".bin";
+		scene->filename = scene->filename+".bin";
 
 		fread((void*)(scene->R), sizeof(float), 9, fp);
 		fread((void*)(scene->K), sizeof(float), 9, fp);
@@ -74,37 +70,34 @@ int main(int argc, char **argv){
 		cout << "Scene: " << totalScenes << " Boxes: " << len << " Bin: " << scene->filename << endl << endl;
 
 		//Output files
-		FILE* tempname = fopen("..//data//julia_data//temp.txt", "w");
+		FILE* tempname = fopen("temp.txt", "w");
 		fprintf(tempname, "%s", s.substr(20).c_str());
 		fclose(tempname);
-		string tsdffile = output_data+"temp.tdsf";
+		string tsdffile = "temp.tdsf";
 
-		unsigned long long  time0,time1;
+		
 
-		time0 = get_timestamp_dss();
-		float* dataCPUmem = new float[len*6*208*208*100];
+		
+		float* dataCPUmem = new float[len*3*208*208*100];
 		StorageT* dataGPUmem;
-		checkCUDA(__LINE__, cudaMalloc(&dataGPUmem, (len)*6*208*208*100*sizeof(float)));
-		time1 = get_timestamp_dss();
-		cout << "cpu->gpu time " << (time1-time0)/1000 << " ms" << endl;
+		checkCUDA(__LINE__, cudaMalloc(&dataGPUmem, (len)*3*208*208*100*sizeof(float)));
+	
 
-		time0 = get_timestamp_dss();
+		
 		compute_TSDF(&scenes, &box_id, dataGPUmem,grid_size,encode_type,scale);
-		time1 = get_timestamp_dss();
-		cout << "compute time " << (time1-time0)/1000 << " ms" << endl;
+		
 
-		time0 = get_timestamp_dss();
-		checkCUDA(__LINE__, cudaMemcpy(dataCPUmem, dataGPUmem,(len)*6*208*208*100*sizeof(float), cudaMemcpyDeviceToHost) );
-		time1 = get_timestamp_dss();
-		cout << "gpu->cpu time " << (time1-time0)/1000 << " ms" << endl;
+		
+		checkCUDA(__LINE__, cudaMemcpy(dataCPUmem, dataGPUmem,(len)*3*208*208*100*sizeof(float), cudaMemcpyDeviceToHost) );
+	
+		
 
-		//write TSDF to temp file because couldnt figure out how to pass it to Julia
-		time0 = get_timestamp_dss();
+	
 		FILE * fid = fopen(tsdffile.c_str(),"wb");
-		fwrite(dataCPUmem,sizeof(float),len*6*208*208*100,fid);
+		fwrite(dataCPUmem,sizeof(float),len*3*208*208*100,fid);
 		fclose(fid);
-		time1 = get_timestamp_dss();
-		cout << "cpu->file " << (time1-time0)/1000 << " ms" << endl << endl;
+		
+		
 
 		//clear for workaround
 		scenes.clear();
@@ -128,8 +121,8 @@ int main(int argc, char **argv){
 /* USED THIS CODE TO EXTRACT DATA ALREADY
 void convertBoxesList()
 {
-	string box2d = data_root+"boxes2d_NYU_po_nb2000.list";
-    	cout<<"Loading 2d boxes list file: "<< box2d << endl;
+	string box2d = "boxes2d_NYU_po_nb2000.list";
+    	
     	FILE* fp2d = fopen(box2d.c_str(),"rb");
     	if (fp2d==NULL) { cout << "Failed to open file: "<< box2d<< endl; exit(EXIT_FAILURE); }
 
@@ -155,7 +148,7 @@ void convertBoxesList()
 		file_size += fread((void*)(&len),    sizeof(unsigned int),   1, fp2d);
 		scene->objects.resize(len);
       
-      		//cout<<scene->filename << endl;
+      		
       		for (int bid = 0;bid<len;bid++){
 			//struct Box2D{
 			  //unsigned int category;

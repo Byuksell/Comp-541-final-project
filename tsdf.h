@@ -195,7 +195,7 @@ public:
 
   void free(){
     if (GPUdata){
-      
+      //std::cout<< "free GPUdata"<<std::endl;
       if (RGBDimage   !=NULL) {checkCUDA(__LINE__, cudaFree(RGBDimage));    RGBDimage = NULL;}
       if (beIndex     !=NULL) {checkCUDA(__LINE__, cudaFree(beIndex));      beIndex = NULL;}
       if (beLinIdx    !=NULL) {checkCUDA(__LINE__, cudaFree(beLinIdx));     beLinIdx = NULL;}
@@ -228,7 +228,7 @@ public:
 void compute_TSDF(std::vector<Scene3D*> *chosen_scenes_ptr, std::vector<int> *chosen_box_id, StorageT* datamem, std::vector<int> grid_size, int encode_type, float scale) {
     int totalcounter = 0;
     float tsdf_size = grid_size[1];
-  
+ 
 
     int numeltsdf = grid_size[0]*tsdf_size*tsdf_size*tsdf_size;
     int THREADS_NUM = 1024;
@@ -237,12 +237,19 @@ void compute_TSDF(std::vector<Scene3D*> *chosen_scenes_ptr, std::vector<int> *ch
 
     checkCUDA(__LINE__, cudaMalloc(&bb3d_data,  sizeof(float)*15));
     
-  
+    //Scene3D* scene_prev = NULL;
     for (int sceneId = 0;sceneId<(*chosen_scenes_ptr).size();sceneId++){        
         Scene3D* scene = (*chosen_scenes_ptr)[sceneId];
-       
+        // perpare scene
         scene->loadData2XYZimage(); 
-
+/*
+        if (scene!=scene_prev){
+            if (scene_prev!=NULL){
+               scene_prev -> free();
+            }
+            scene->loadData2XYZimage(); 
+        }
+*/
         
         int boxId = (*chosen_box_id)[sceneId];
         checkCUDA(__LINE__, cudaMemcpy(bb3d_data, scene->objects[boxId].base, sizeof(float)*15, cudaMemcpyHostToDevice));
@@ -282,6 +289,11 @@ void compute_TSDF(std::vector<Scene3D*> *chosen_scenes_ptr, std::vector<int> *ch
     }
     checkCUDA(__LINE__, cudaFree(bb3d_data));
     
-
+	/*
+    // free the loaded images
+    for (int sceneId = 0;sceneId<(*chosen_scenes_ptr).size();sceneId++){
+        (*chosen_scenes_ptr)[sceneId]->free();
+    }
+	*/
 }
 
