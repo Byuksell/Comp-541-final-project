@@ -25,7 +25,7 @@ for i=1:imgs
 
 
 	#3D Input
-	TSDFfile=open("../data/julia_data/temp.tdsf", "r");
+	TSDFfile=open("../data/temp.tdsf", "r");
 	x3D=zeros(Float32, boxnum, 6, 208, 208, 100);
 	read!(TSDFfile, x3D);
 	close(TSDFfile);
