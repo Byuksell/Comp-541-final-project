@@ -57,7 +57,7 @@ end
 
 
 
-@knet function RPNLevel1(x)
+@knet function RPNLevel2(x)
 	w=par(init=RPNWeights["conv1_w"], dims=(5,5,5,6,96))
 	b=par(init=RPNWeights["conv1_b"], dims=(1,1,1,96))
 	m=conv(w,x; window=5, padding=2, stride=1)
