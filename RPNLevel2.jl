@@ -79,7 +79,7 @@ end
 	
 	
 	w=par(init=RPNWeights["conv_cls_score_w"], dims=(5,5,5,384,30))
-	b=par(init=RPNWeights["conv_cls_score_b"], dims=(1,1,1,8))
+	b=par(init=RPNWeights["conv_cls_score_b"], dims=(1,1,1,30))
 	m=conv(w,m; window=5, padding=2, stride=1)
 	m=reshape(m; outdims=(2,2,15,53,53,26))	
 	 return wbf(m; out=2, f=:soft)
