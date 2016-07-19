@@ -1,9 +1,9 @@
 
 using Knet
 using MAT
-RPNWeights=matread("../data/julia_data/RPN.mat");
-gturths=matread("../data/julia_data/SUNRGBDMeta.mat");
-candidates3d=matread("../data/julia_data/candidates3d.mat"); 
+RPNWeights=matread("../data/RPN.mat");
+gturths=matread("../data/SUNRGBDMeta.mat");
+candidates3d=matread("../data/candidates3d.mat"); 
 
 function main()
 
@@ -18,7 +18,7 @@ for i=1:imgs
 	#TSDF Computation
 	run(`./tsdf $i`);
 
-	tempfilename = open("..//data//julia_data//temp.txt");
+	tempfilename = open("..//data//temp.txt");
 	filename = readall(tempfilename);
 	close(tempfilename);
 	
@@ -26,7 +26,7 @@ for i=1:imgs
 
 
 	#3D Input
-	TSDFfile=open("../data/julia_data/temp.tdsf", "r");
+	TSDFfile=open("../data/temp.tdsf", "r");
 	x3D=zeros(Float32, boxnum, 6, 208, 208, 100);
 	read!(TSDFfile, x3D);
 	close(TSDFfile);
